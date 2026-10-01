@@ -605,7 +605,7 @@ export default function App() {
         </main>
       </div>
 
-      <footer className="credit">Creado By Flo Bagnis 💗</footer>
+      <footer className="credit">Creado By Flor Bagnis 💗</footer>
     </div>
   );
 }
