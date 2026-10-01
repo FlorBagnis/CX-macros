@@ -4,6 +4,17 @@ import { TEMPLATES } from "./data/templates";
 const VARIABLE = /\{\{(\w+)\}\}/g;
 const FAV_LABEL = "★ Favoritas";
 
+// Función para pulir ortografía, espacios y mayúsculas
+const corregirOrtografia = (texto) => {
+  if (!texto) return "";
+  let corregido = texto
+    .replace(/([.,!?;:])([^\s\d])/g, "$1 $2")
+    .replace(/\s+/g, " ")
+    .replace(/(^\s*|[.!?]\s+)([a-z])/g, (match) => match.toUpperCase())
+    .trim();
+  return corregido.charAt(0).toUpperCase() + corregido.slice(1);
+};
+
 // localStorage protegido: si el navegador lo bloquea, la app sigue funcionando
 const load = (key, fallback) => {
   try {
@@ -80,6 +91,16 @@ export default function App() {
   const select = (id) => { setSelectedId(id); setDraft(null); setError(""); if (isMobile()) setListOpen(false); };
   const startNew = () => { setDraft({ id: null, title: "", category: "", body: "" }); setError(""); if (isMobile()) setListOpen(false); };
   const startEdit = () => { setDraft({ ...current }); setError(""); };
+
+  // Función para ejecutar el botón mágico de corrección en el borrador
+  const handlePulirTexto = () => {
+    if (!draft) return;
+    setDraft({
+      ...draft,
+      title: corregirOrtografia(draft.title),
+      body: corregirOrtografia(draft.body)
+    });
+  };
 
   const saveDraft = () => {
     const title = draft.title.trim();
@@ -199,7 +220,17 @@ export default function App() {
         <main className="detail">
           {draft ? (
             <>
-              <h2>{draft.id === null ? "Nueva plantilla" : "Editar plantilla"}</h2>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h2>{draft.id === null ? "Nueva plantilla" : "Editar plantilla"}</h2>
+                <button 
+                  type="button" 
+                  className="ghost small" 
+                  onClick={handlePulirTexto}
+                  title="Mejora mayúsculas y espacios automáticamente"
+                >
+                  ✨ Pulir texto
+                </button>
+              </div>
               <div className="form">
                 <label>
                   Título
