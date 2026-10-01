@@ -43,23 +43,16 @@ function findBackground(el) {
 }
 
 function readPalette() {
+  const css = getComputedStyle(document.documentElement);
+  const v = (name) => solid(css.getPropertyValue(name).trim());
   const dark = document.documentElement.dataset.theme === "dark";
-  const app = document.querySelector(".app") || document.body;
-  const bg = findBackground(app) || (dark ? [24, 16, 22] : [255, 255, 255]);
-  const text = solid(getComputedStyle(app).color) || (dark ? [245, 235, 240] : [51, 51, 51]);
-  const cardEl = document.querySelector(".preview") || document.querySelector(".detail");
-  const card = (cardEl && solid(getComputedStyle(cardEl).backgroundColor)) || mix(text, bg, 0.06);
- const accentEl = document.querySelector(".primary");
-const titleEl = document.querySelector("header h1");
-const accent =
-  (titleEl && solid(getComputedStyle(titleEl).color)) ||
-  (dark ? [244, 114, 182] : [190, 24, 93]);
-  
-  return {
-    bg, text, card, accent,
-    muted: mix(text, bg, 0.62),
-    border: mix(text, bg, 0.16),
-  };
+  const bg = v("--rosa-fondo") || (dark ? [15, 10, 13] : [249, 192, 211]);
+  const text = v("--texto-oscuro") || (dark ? [253, 242, 248] : [45, 18, 34]);
+  const card = v("--preview") || mix(text, bg, 0.06);
+  const accent = v("--rosa-oscuro") || (dark ? [244, 114, 182] : [190, 24, 93]);
+  const muted = v("--texto-secundario") || mix(text, bg, 0.62);
+  const border = v("--rosa-suave") || mix(text, bg, 0.16);
+  return { bg, text, card, accent, muted, border };
 }
 
 // El PDF estándar no soporta emojis: se quitan (tildes, ñ, ¡ y ¿ sí funcionan)
