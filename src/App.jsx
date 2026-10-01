@@ -4,7 +4,7 @@ import { TEMPLATES } from "./data/templates";
 const VARIABLE = /\{\{(\w+)\}\}/g;
 const FAV_LABEL = "★ Favoritas";
 
-// Diccionario robusto y ampliado de tildes para CX, Soporte, Apellidos y Nombres
+// Diccionario robusto de tildes para CX, Soporte, Apellidos y Nombres
 const DICCIONARIO_TILDES = {
   // Comunicación y atención general
   "comunicacion": "comunicación",
@@ -157,7 +157,6 @@ const DICCIONARIO_TILDES = {
   "camila": "Camila",
   "florencia": "Florencia",
   "rocio": "Rocío",
-  "belen": "Belén",
   "julieta": "Julieta",
   "martina": "Martina",
   "catalina": "Catalina",
@@ -169,7 +168,6 @@ const DICCIONARIO_TILDES = {
   "andrea": "Andrea",
   "claudia": "Claudia",
   "silvia": "Silvia",
-  "valeria": "Valeria",
   "natalia": "Natalia",
   "vanesa": "Vanesa",
   "daiana": "Daiana",
@@ -180,14 +178,12 @@ const DICCIONARIO_TILDES = {
 
   // Nombres de hombre comunes con tilde
   "jose": "José",
-  "maria": "María", // unisex
   "angel": "Ángel",
   "tomas": "Tomás",
   "nicolas": "Nicolás",
   "lucas": "Lucas",
   "matias": "Matías",
   "joaquin": "Joaquín",
-  "martin": "Martín",
   "gaston": "Gastón",
   "damian": "Damián",
   "emiliano": "Emiliano",
@@ -204,7 +200,6 @@ const DICCIONARIO_TILDES = {
   "adrian": "Adrián",
   "cristian": "Cristian",
   "sebastian": "Sebastián",
-  "julián": "Julián",
   "julian": "Julián",
   "santiago": "Santiago",
   "alejandro": "Alejandro",
@@ -218,7 +213,6 @@ const DICCIONARIO_TILDES = {
   "diego": "Diego",
   "javier": "Javier",
   "fernando": "Fernando",
-  "martin": "Martín",
   "mariano": "Mariano",
   "maximiliano": "Maximiliano",
   "nestor": "Néstor",
@@ -232,7 +226,6 @@ const DICCIONARIO_TILDES = {
   "anibal": "Aníbal",
   "cesar": "César",
   "omar": "Omar",
-  "nestor": "Néstor",
   "walter": "Walter",
   "esteban": "Esteban",
   "ramon": "Ramón"
@@ -241,16 +234,15 @@ const DICCIONARIO_TILDES = {
 const corregirOrtografia = (texto) => {
   if (!texto) return "";
 
-  // 1. Evitamos tocar las variables entre llaves como {{nombre}} o {{pedido}} dividiendo por partes
+  // 1. Proteger variables entre llaves como {{nombre}} o {{pedido}}
   const partes = texto.split(/(\{\{\w+\}\})/g);
 
   const partesCorregidas = partes.map((parte) => {
-    // Si la parte es una variable protegida, la dejamos tal cual
     if (parte.startsWith("{{") && parte.endsWith("}}")) {
       return parte;
     }
 
-    // Corregimos palabras sueltas usando el diccionario
+    // Corregir palabras usando el diccionario
     let palabras = parte.split(/\b/);
     palabras = palabras.map((palabra) => {
       let lower = palabra.toLowerCase();
@@ -269,7 +261,18 @@ const corregirOrtografia = (texto) => {
 
   let corregido = partesCorregidas.join("");
 
-  // 2. Limpieza general de puntuación, espacios dobles y mayúsculas iniciales
+  // 2. Formateo inteligente de signos de exclamación en saludos (ej: "Hola Maria" -> "¡Hola, María!")
+  corregido = corregido.replace(/\b(Hola|Buenas|Buenos días|Buenas tardes|Buenas noches)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)/gi, (match, saludo, nombre) => {
+    // Capitalizar correctamente el saludo y el nombre si es necesario
+    const saludoFormateado = saludo.charAt(0).toUpperCase() + saludo.slice(1).toLowerCase();
+    const nombreFormateado = DICCIONARIO_TILDES[nombre.toLowerCase()] || (nombre.charAt(0).toUpperCase() + nombre.slice(1).toLowerCase());
+    return `¡${saludoFormateado}, ${nombreFormateado}!`;
+  });
+
+  // 3. Agregar signos de exclamación a saludos sueltos comunes si no los tienen
+  corregido = corregido.replace(/^(Hola|Bienvenido|Muchas gracias|Gracias por escribirnos)(?!\s*[!¡])/gim, "¡$1!");
+
+  // 4. Inserción de comas en otros contextos si hace falta y limpieza general
   corregido = corregido
     .replace(/([.,!?;:])([^\s\d])/g, "$1 $2")
     .replace(/\s+/g, " ")
@@ -490,7 +493,7 @@ export default function App() {
                   type="button" 
                   className="ghost small" 
                   onClick={handlePulirTexto}
-                  title="Corrige tildes, mayúsculas y espacios sin tocar las variables"
+                  title="Corrige tildes, comas, signos de exclamación y espacios"
                 >
                   ✨ Pulir texto
                 </button>
