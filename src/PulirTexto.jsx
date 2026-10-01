@@ -129,9 +129,7 @@ export default function PulirTexto({ draft, setDraft, corregirLocal }) {
         </button>
       </div>
       {msg && <span role="status" style={{ fontSize: 12, opacity: 0.85, textAlign: "right" }}>{msg}</span>}
-      <a href="https://languagetool.org" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, opacity: 0.6 }}>
-        Corrector online: LanguageTool
-      </a>
+     
     </div>
   );
 }
