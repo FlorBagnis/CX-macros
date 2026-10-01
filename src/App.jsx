@@ -5,7 +5,6 @@ const VARIABLE = /\{\{(\w+)\}\}/g;
 const FAV_LABEL = "★ Favoritas";
 
 // Diccionario robusto de tildes para CX, Soporte, Apellidos y Nombres
-
 const DICCIONARIO_TILDES = {
   // Comunicación y atención general
   "comunicacion": "comunicación",
@@ -418,73 +417,103 @@ export default function App() {
     document.body.removeChild(link);
   };
 
-  // Exportar a PDF personalizado y formateado profesionalmente usando jsPDF desde CDN
+  // Exportar a PDF personalizado usando ventana de impresión limpia (infalible en GitHub/Web)
   const exportPDF = () => {
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-    script.onload = () => {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert("Por favor, permite las ventanas emergentes (pop-ups) para generar el PDF.");
+      return;
+    }
 
-      let y = 20;
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(18);
-      doc.setTextColor(230, 100, 140); // Tono rosado aesthetic
-      doc.text("CX-Macros - Reporte de Plantillas", 14, y);
-
-      y += 10;
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 14, y);
-
-      y += 10;
-      doc.setLineWidth(0.5);
-      doc.setStrokeColor(220, 200, 210);
-      doc.line(14, y, 196, y);
-
-      y += 10;
-
-      templates.forEach((t, index) => {
-        if (y > 270) {
-          doc.addPage();
-          y = 20;
-        }
-
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(12);
-        doc.setTextColor(50, 50, 50);
-        doc.text(`${index + 1}. ${t.title}`, 14, y);
-
-        y += 6;
-        doc.setFont("helvetica", "italic");
-        doc.setFontSize(9);
-        doc.setTextColor(150, 100, 120);
-        doc.text(`Categoría: ${t.category}`, 14, y);
-
-        y += 6;
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        doc.setTextColor(80, 80, 80);
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <title>CX-Macros - Reporte de Plantillas</title>
+        <style>
+          body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #333;
+            padding: 40px;
+            line-height: 1.6;
+          }
+          h1 {
+            color: #e6648c;
+            font-size: 22px;
+            border-bottom: 2px solid #f3d1dc;
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+          }
+          .date {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 30px;
+          }
+          .template-card {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            page-break-inside: avoid;
+          }
+          .title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #222;
+          }
+          .category {
+            font-size: 11px;
+            color: #9b5185;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 6px;
+          }
+          .body {
+            font-size: 13px;
+            color: #555;
+            white-space: pre-wrap;
+            background: #fafafa;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #f0f0f0;
+          }
+          footer {
+            margin-top: 40px;
+            text-align: right;
+            font-size: 12px;
+            font-weight: bold;
+            color: #e6648c;
+          }
+          @media print {
+            body { padding: 20px; }
+          }
+        </style>
+      </head>
+      <body>
+        <h1>CX-Macros - Reporte de Plantillas</h1>
+        <div class="date">Generado el ${new Date().toLocaleDateString()}</div>
         
-        // Ajustar texto largo en varias líneas automáticamente
-        const splitBody = doc.splitTextToSize(t.body, 180);
-        doc.text(splitBody, 14, y);
+        ${templates.map((t, index) => `
+          <div class="template-card">
+            <div class="title">${index + 1}.${t.title}</div>
+            <div class="category">Categoría: ${t.category}</div>
+            <div class="body">${t.body}</div>
+          </div>
+        `).join('')}
 
-        y += (splitBody.length * 6) + 8;
-      });
+        <footer>Creado By Flor Bagnis 💗</footer>
 
-      // Pie de página en el PDF
-      if (y > 270) doc.addPage();
-      y = Math.max(y, 280);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(9);
-      doc.setTextColor(200, 120, 150);
-      doc.text("Creado By Flor Bagnis 💗", 14, y);
+        <script>
+          window.onload = function() {
+            window.print();
+          };
+        </script>
+      </body>
+      </html>
+    `;
 
-      doc.save("cx_macros_respuestas.pdf");
-    };
-    document.body.appendChild(script);
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
   };
 
   return (
