@@ -4,14 +4,86 @@ import { TEMPLATES } from "./data/templates";
 const VARIABLE = /\{\{(\w+)\}\}/g;
 const FAV_LABEL = "★ Favoritas";
 
-// Función para pulir ortografía, espacios y mayúsculas
+// Diccionario robusto de tildes y correcciones para soporte y CX
+const DICCIONARIO_TILDES = {
+  "envio": "envío",
+  "envios": "envíos",
+  "rapido": "rápido",
+  "rapidos": "rápidos",
+  "atencion": "atención",
+  "codigo": "código",
+  "codigos": "códigos",
+  "numero": "número",
+  "numeros": "números",
+  "dias": "días",
+  "dia": "día",
+  "maximo": "máximo",
+  "minimo": "mínimo",
+  "estandar": "estándar",
+  "metodo": "método",
+  "metodos": "métodos",
+  "devolucion": "devolución",
+  "devoluciones": "devoluciones",
+  "informacion": "información",
+  "configuracion": "configuración",
+  "verificacion": "verificación",
+  "ultima": "última",
+  "ultimas": "últimas",
+  "ultimo": "último",
+  "ultimos": "últimos",
+  "tambien": "también",
+  "mas": "más",
+  "proximo": "próximo",
+  "proximos": "próximos",
+  "telefonica": "telefónica",
+  "electronico": "electrónico",
+  "credito": "crédito",
+  "debito": "débito",
+  "exito": "éxito",
+  "historico": "histórico",
+  "caracteristicas": "características",
+  "especifico": "específico",
+  "especificos": "específicos"
+};
+
 const corregirOrtografia = (texto) => {
   if (!texto) return "";
-  let corregido = texto
+
+  // 1. Evitamos tocar las variables entre llaves como {{nombre}} o {{pedido}} dividiendo por partes
+  const partes = texto.split(/(\{\{\w+\}\})/g);
+
+  const partesCorregidas = partes.map((parte) => {
+    // Si la parte es una variable protegida, la dejamos tal cual
+    if (parte.startsWith("{{") && parte.endsWith("}}")) {
+      return parte;
+    }
+
+    // Corregimos palabras sueltas usando el diccionario
+    let palabras = parte.split(/\b/);
+    palabras = palabras.map((palabra) => {
+      let lower = palabra.toLowerCase();
+      if (DICCIONARIO_TILDES[lower]) {
+        let corregida = DICCIONARIO_TILDES[lower];
+        if (palabra[0] === palabra[0].toUpperCase()) {
+          corregida = corregida.charAt(0).toUpperCase() + corregida.slice(1);
+        }
+        return corregida;
+      }
+      return palabra;
+    });
+
+    return palabras.join("");
+  });
+
+  let corregido = partesCorregidas.join("");
+
+  // 2. Limpieza general de puntuación, espacios dobles y mayúsculas iniciales
+  corregido = corregido
     .replace(/([.,!?;:])([^\s\d])/g, "$1 $2")
     .replace(/\s+/g, " ")
     .replace(/(^\s*|[.!?]\s+)([a-z])/g, (match) => match.toUpperCase())
     .trim();
+
   return corregido.charAt(0).toUpperCase() + corregido.slice(1);
 };
 
@@ -92,7 +164,7 @@ export default function App() {
   const startNew = () => { setDraft({ id: null, title: "", category: "", body: "" }); setError(""); if (isMobile()) setListOpen(false); };
   const startEdit = () => { setDraft({ ...current }); setError(""); };
 
-  // Función para ejecutar el botón mágico de corrección en el borrador
+  // Ejecuta la corrección avanzada en el borrador
   const handlePulirTexto = () => {
     if (!draft) return;
     setDraft({
@@ -226,7 +298,7 @@ export default function App() {
                   type="button" 
                   className="ghost small" 
                   onClick={handlePulirTexto}
-                  title="Mejora mayúsculas y espacios automáticamente"
+                  title="Corrige tildes, mayúsculas y espacios sin tocar las variables"
                 >
                   ✨ Pulir texto
                 </button>
