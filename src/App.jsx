@@ -233,16 +233,11 @@ const DICCIONARIO_TILDES = {
 
 const corregirOrtografia = (texto) => {
   if (!texto) return "";
-
-  // 1. Proteger variables entre llaves como {{nombre}} o {{pedido}}
   const partes = texto.split(/(\{\{\w+\}\})/g);
-
   const partesCorregidas = partes.map((parte) => {
     if (parte.startsWith("{{") && parte.endsWith("}}")) {
       return parte;
     }
-
-    // Corregir palabras usando el diccionario
     let palabras = parte.split(/\b/);
     palabras = palabras.map((palabra) => {
       let lower = palabra.toLowerCase();
@@ -255,33 +250,24 @@ const corregirOrtografia = (texto) => {
       }
       return palabra;
     });
-
     return palabras.join("");
   });
-
   let corregido = partesCorregidas.join("");
-
-  // 2. Formateo inteligente de signos de exclamación en saludos (ej: "Hola Maria" -> "¡Hola, María!")
   corregido = corregido.replace(/\b(Hola|Buenas|Buenos días|Buenas tardes|Buenas noches)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)/gi, (match, saludo, nombre) => {
     const saludoFormateado = saludo.charAt(0).toUpperCase() + saludo.slice(1).toLowerCase();
     const nombreFormateado = DICCIONARIO_TILDES[nombre.toLowerCase()] || (nombre.charAt(0).toUpperCase() + nombre.slice(1).toLowerCase());
     return `¡${saludoFormateado}, ${nombreFormateado}!`;
   });
-
-  // 3. Agregar signos de exclamación a saludos sueltos comunes si no los tienen
   corregido = corregido.replace(/^(Hola|Bienvenido|Muchas gracias|Gracias por escribirnos)(?!\s*[!¡])/gim, "¡$1!");
-
-  // 4. Inserción de comas y limpieza general
   corregido = corregido
     .replace(/([.,!?;:])([^\s\d])/g, "$1 $2")
     .replace(/\s+/g, " ")
     .replace(/(^\s*|[.!?]\s+)([a-z])/g, (match) => match.toUpperCase())
     .trim();
-
   return corregido.charAt(0).toUpperCase() + corregido.slice(1);
 };
 
-// localStorage protegido: si el navegador lo bloquea, la app sigue funcionando
+// localStorage protegido
 const load = (key, fallback) => {
   try {
     const raw = localStorage.getItem(key);
@@ -314,7 +300,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(templates[0]?.id ?? null);
   const [values, setValues] = useState({});
   const [copied, setCopied] = useState(false);
-  const [draft, setDraft] = useState(null); // plantilla que se está creando o editando
+  const [draft, setDraft] = useState(null);
   const [error, setError] = useState("");
   const [saveFailed, setSaveFailed] = useState(false);
   const isMobile = () => window.matchMedia?.("(max-width: 800px)").matches;
@@ -358,7 +344,6 @@ export default function App() {
   const startNew = () => { setDraft({ id: null, title: "", category: "", body: "" }); setError(""); if (isMobile()) setListOpen(false); };
   const startEdit = () => { setDraft({ ...current }); setError(""); };
 
-  // Ejecuta la corrección avanzada en el borrador
   const handlePulirTexto = () => {
     if (!draft) return;
     setDraft({
@@ -414,7 +399,7 @@ export default function App() {
     }).catch(() => {});
   };
 
-  // Función para exportar a CSV
+  // Exportar a CSV
   const exportCSV = () => {
     const headers = ["Título", "Categoría", "Texto"];
     const rows = templates.map((t) => [
@@ -432,23 +417,73 @@ export default function App() {
     document.body.removeChild(link);
   };
 
-  // Función para exportar a PDF respetando el tema (claro/oscuro) activo
+  // Exportar a PDF personalizado y formateado profesionalmente usando jsPDF desde CDN
   const exportPDF = () => {
-    const element = document.querySelector(".app");
-    const options = {
-      margin:       10,
-      filename:     'cx_macros_respuestas.pdf',
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.onload = () => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      let y = 20;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.setTextColor(230, 100, 140); // Tono rosado aesthetic
+      doc.text("CX-Macros - Reporte de Plantillas", 14, y);
+
+      y += 10;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 14, y);
+
+      y += 10;
+      doc.setLineWidth(0.5);
+      doc.setStrokeColor(220, 200, 210);
+      doc.line(14, y, 196, y);
+
+      y += 10;
+
+      templates.forEach((t, index) => {
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.setTextColor(50, 50, 50);
+        doc.text(`${index + 1}. ${t.title}`, 14, y);
+
+        y += 6;
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(9);
+        doc.setTextColor(150, 100, 120);
+        doc.text(`Categoría: ${t.category}`, 14, y);
+
+        y += 6;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(80, 80, 80);
+        
+        // Ajustar texto largo en varias líneas automáticamente
+        const splitBody = doc.splitTextToSize(t.body, 180);
+        doc.text(splitBody, 14, y);
+
+        y += (splitBody.length * 6) + 8;
+      });
+
+      // Pie de página en el PDF
+      if (y > 270) doc.addPage();
+      y = Math.max(y, 280);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(200, 120, 150);
+      doc.text("Creado By Flor Bagnis 💗", 14, y);
+
+      doc.save("cx_macros_respuestas.pdf");
     };
-    
-    // Cargar dinámicamente html2pdf si está instalado
-    import('html2pdf.js').then((html2pdf) => {
-      html2pdf.default().from(element).set(options).save();
-    }).catch(() => {
-      window.print(); // Fallback si no está instalado el paquete
-    });
+    document.body.appendChild(script);
   };
 
   return (
@@ -517,12 +552,11 @@ export default function App() {
           </ul>
           <button className="ghost small" onClick={restore}>Restaurar plantillas de ejemplo</button>
           
-          {/* Botones de Exportar */}
           <div className="export-actions" style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
             <button className="ghost small" onClick={exportCSV} title="Exportar a Excel / CSV" style={{ flex: 1 }}>
               📥 CSV
             </button>
-            <button className="ghost small" onClick={exportPDF} title="Exportar a PDF" style={{ flex: 1 }}>
+            <button className="ghost small" onClick={exportPDF} title="Generar PDF formal" style={{ flex: 1 }}>
               📄 PDF
             </button>
           </div>
