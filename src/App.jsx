@@ -263,7 +263,6 @@ const corregirOrtografia = (texto) => {
 
   // 2. Formateo inteligente de signos de exclamación en saludos (ej: "Hola Maria" -> "¡Hola, María!")
   corregido = corregido.replace(/\b(Hola|Buenas|Buenos días|Buenas tardes|Buenas noches)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)/gi, (match, saludo, nombre) => {
-    // Capitalizar correctamente el saludo y el nombre si es necesario
     const saludoFormateado = saludo.charAt(0).toUpperCase() + saludo.slice(1).toLowerCase();
     const nombreFormateado = DICCIONARIO_TILDES[nombre.toLowerCase()] || (nombre.charAt(0).toUpperCase() + nombre.slice(1).toLowerCase());
     return `¡${saludoFormateado}, ${nombreFormateado}!`;
@@ -272,7 +271,7 @@ const corregirOrtografia = (texto) => {
   // 3. Agregar signos de exclamación a saludos sueltos comunes si no los tienen
   corregido = corregido.replace(/^(Hola|Bienvenido|Muchas gracias|Gracias por escribirnos)(?!\s*[!¡])/gim, "¡$1!");
 
-  // 4. Inserción de comas en otros contextos si hace falta y limpieza general
+  // 4. Inserción de comas y limpieza general
   corregido = corregido
     .replace(/([.,!?;:])([^\s\d])/g, "$1 $2")
     .replace(/\s+/g, " ")
@@ -415,6 +414,43 @@ export default function App() {
     }).catch(() => {});
   };
 
+  // Función para exportar a CSV
+  const exportCSV = () => {
+    const headers = ["Título", "Categoría", "Texto"];
+    const rows = templates.map((t) => [
+      `"${t.title.replace(/"/g, '""')}"`,
+      `"${t.category.replace(/"/g, '""')}"`,
+      `"${t.body.replace(/"/g, '""')}"`
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "cx_macros_respuestas.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Función para exportar a PDF respetando el tema (claro/oscuro) activo
+  const exportPDF = () => {
+    const element = document.querySelector(".app");
+    const options = {
+      margin:       10,
+      filename:     'cx_macros_respuestas.pdf',
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    // Cargar dinámicamente html2pdf si está instalado
+    import('html2pdf.js').then((html2pdf) => {
+      html2pdf.default().from(element).set(options).save();
+    }).catch(() => {
+      window.print(); // Fallback si no está instalado el paquete
+    });
+  };
+
   return (
     <div className="app">
       <header>
@@ -480,6 +516,17 @@ export default function App() {
             ))}
           </ul>
           <button className="ghost small" onClick={restore}>Restaurar plantillas de ejemplo</button>
+          
+          {/* Botones de Exportar */}
+          <div className="export-actions" style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+            <button className="ghost small" onClick={exportCSV} title="Exportar a Excel / CSV" style={{ flex: 1 }}>
+              📥 CSV
+            </button>
+            <button className="ghost small" onClick={exportPDF} title="Exportar a PDF" style={{ flex: 1 }}>
+              📄 PDF
+            </button>
+          </div>
+
           </div>
           )}
         </aside>
@@ -558,7 +605,7 @@ export default function App() {
         </main>
       </div>
 
-      <footer className="credit">Creado by Flor Bagnis 💗</footer>
+      <footer className="credit">Creado By Flo Bagnis 💗</footer>
     </div>
   );
 }
