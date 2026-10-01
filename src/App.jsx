@@ -5,6 +5,7 @@ const VARIABLE = /\{\{(\w+)\}\}/g;
 const FAV_LABEL = "★ Favoritas";
 
 // Diccionario robusto de tildes para CX, Soporte, Apellidos y Nombres
+
 const DICCIONARIO_TILDES = {
   // Comunicación y atención general
   "comunicacion": "comunicación",
