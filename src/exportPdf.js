@@ -51,10 +51,9 @@ function readPalette() {
   const card = (cardEl && solid(getComputedStyle(cardEl).backgroundColor)) || mix(text, bg, 0.06);
  const accentEl = document.querySelector(".primary");
 const titleEl = document.querySelector("header h1");
-const accent = !dark && titleEl
-  ? solid(getComputedStyle(titleEl).color) || [190, 24, 93]
-  : (accentEl && solid(getComputedStyle(accentEl).backgroundColor)) ||
-    (dark ? [244, 114, 182] : [230, 100, 140]);
+const accent =
+  (titleEl && solid(getComputedStyle(titleEl).color)) ||
+  (dark ? [244, 114, 182] : [190, 24, 93]);
   
   return {
     bg, text, card, accent,
