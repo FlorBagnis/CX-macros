@@ -40,6 +40,8 @@ export default function App() {
   const [draft, setDraft] = useState(null); // plantilla que se está creando o editando
   const [error, setError] = useState("");
   const [saveFailed, setSaveFailed] = useState(false);
+  const isMobile = () => window.matchMedia?.("(max-width: 800px)").matches;
+  const [listOpen, setListOpen] = useState(() => !isMobile());
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -75,8 +77,8 @@ export default function App() {
     ? current.body.replace(VARIABLE, (match, name) => values[name]?.trim() || match)
     : "";
 
-  const select = (id) => { setSelectedId(id); setDraft(null); setError(""); };
-  const startNew = () => { setDraft({ id: null, title: "", category: "", body: "" }); setError(""); };
+  const select = (id) => { setSelectedId(id); setDraft(null); setError(""); if (isMobile()) setListOpen(false); };
+  const startNew = () => { setDraft({ id: null, title: "", category: "", body: "" }); setError(""); if (isMobile()) setListOpen(false); };
   const startEdit = () => { setDraft({ ...current }); setError(""); };
 
   const saveDraft = () => {
@@ -145,6 +147,17 @@ export default function App() {
 
       <div className="layout">
         <aside>
+          <button
+            className="panel-toggle"
+            onClick={() => setListOpen(!listOpen)}
+            aria-expanded={listOpen}
+            aria-controls="panel-plantillas"
+          >
+            <span>Plantillas ({templates.length})</span>
+            <span className={`chevron ${listOpen ? "open" : ""}`} aria-hidden="true">▾</span>
+          </button>
+          {listOpen && (
+          <div id="panel-plantillas">
           <input
             type="search"
             placeholder="Buscar plantilla"
@@ -179,6 +192,8 @@ export default function App() {
             ))}
           </ul>
           <button className="ghost small" onClick={restore}>Restaurar plantillas de ejemplo</button>
+          </div>
+          )}
         </aside>
 
         <main className="detail">
@@ -244,6 +259,8 @@ export default function App() {
           )}
         </main>
       </div>
+
+      <footer className="credit">Creado by Flor Bagnis 💗</footer>
     </div>
   );
 }
