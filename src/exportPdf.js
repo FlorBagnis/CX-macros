@@ -49,10 +49,13 @@ function readPalette() {
   const text = solid(getComputedStyle(app).color) || (dark ? [245, 235, 240] : [51, 51, 51]);
   const cardEl = document.querySelector(".preview") || document.querySelector(".detail");
   const card = (cardEl && solid(getComputedStyle(cardEl).backgroundColor)) || mix(text, bg, 0.06);
-  const accentEl = document.querySelector(".primary");
-  const accent =
-    (accentEl && solid(getComputedStyle(accentEl).backgroundColor)) ||
+ const accentEl = document.querySelector(".primary");
+const titleEl = document.querySelector("header h1");
+const accent = !dark && titleEl
+  ? solid(getComputedStyle(titleEl).color) || [190, 24, 93]
+  : (accentEl && solid(getComputedStyle(accentEl).backgroundColor)) ||
     (dark ? [244, 114, 182] : [230, 100, 140]);
+  
   return {
     bg, text, card, accent,
     muted: mix(text, bg, 0.62),
