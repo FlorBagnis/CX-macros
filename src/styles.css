@@ -2,7 +2,7 @@
 
 /* Paleta copiada del style.css del portfolio */
 :root {
-  --rosa-fondo: #fed7e2;
+  --rosa-fondo: #f4a9c4;
   --rosa-brillante: #ec4899;
   --rosa-oscuro: #be185d;
   --rosa-suave: #fce7f3;
@@ -38,6 +38,8 @@ body {
 header { position: relative; text-align: center; margin-bottom: 32px; padding: 0 56px; }
 h1 { margin: 0 0 6px; color: var(--rosa-brillante); font-size: 34px; font-weight: 800; letter-spacing: -1px; line-height: 1.2; }
 header p { margin: 0; color: var(--texto-secundario); font-weight: 500; }
+
+:root:not([data-theme="dark"]) h1 { color: var(--rosa-oscuro); }
 
 .theme-toggle {
   position: absolute; top: 0; right: 0; width: 44px; height: 44px;
