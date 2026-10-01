@@ -123,6 +123,21 @@ input:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px
 [data-theme="dark"] .ghost { background: rgba(244, 114, 182, 0.12); border-color: rgba(244, 114, 182, 0.3); color: #fbcfe8; box-shadow: none; }
 [data-theme="dark"] .ghost:hover { background: rgba(244, 114, 182, 0.22); color: #fff; }
 
+/* Solapa que muestra u oculta el panel de plantillas */
+.panel-toggle {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px; padding: 10px 16px; background: var(--rosa-suave);
+  border: 1.5px solid var(--rosa-brillante); border-radius: 16px; font: inherit;
+  font-size: 15px; font-weight: 700; color: var(--rosa-oscuro); cursor: pointer; transition: 0.25s;
+}
+.panel-toggle:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(236, 72, 153, 0.18); }
+.panel-toggle[aria-expanded="false"] { margin-bottom: 0; }
+.chevron { display: inline-block; transition: transform 0.25s ease; }
+.chevron.open { transform: rotate(180deg); }
+
+/* Crédito al pie */
+.credit { margin: 36px 0 0; text-align: center; font-size: 14px; font-weight: 600; color: var(--texto-secundario); }
+
 @media (max-width: 800px) {
   body { padding: 30px 16px; }
   .layout { grid-template-columns: 1fr; }
