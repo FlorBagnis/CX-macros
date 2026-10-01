@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { TEMPLATES } from "./data/templates";
+import { exportTemplatesPdf } from "./exportPdf";
 
 const VARIABLE = /\{\{(\w+)\}\}/g;
 const FAV_LABEL = "★ Favoritas";
@@ -303,6 +304,7 @@ export default function App() {
   const [draft, setDraft] = useState(null);
   const [error, setError] = useState("");
   const [saveFailed, setSaveFailed] = useState(false);
+  const [pdfStatus, setPdfStatus] = useState("");
   const isMobile = () => window.matchMedia?.("(max-width: 800px)").matches;
   const [listOpen, setListOpen] = useState(() => !isMobile());
 
@@ -516,6 +518,22 @@ export default function App() {
     printWindow.document.close();
   };
 
+  const handleExportPdf = async () => {
+    if (pdfStatus === "busy") return;
+    setPdfStatus("busy");
+    try {
+      await exportTemplatesPdf(templates);
+      setPdfStatus("done");
+      setTimeout(() => setPdfStatus(""), 2500);
+    } catch (e) {
+      console.error(e);
+      setPdfStatus("");
+      alert("No se pudo generar el PDF. Revisá tu conexión e intentá de nuevo.");
+    }
+  };
+
+
+  
   return (
     <div className="app">
       <header>
@@ -586,8 +604,8 @@ export default function App() {
             <button className="ghost small" onClick={exportCSV} title="Exportar a Excel / CSV" style={{ flex: 1 }}>
               📥 CSV
             </button>
-            <button className="ghost small" onClick={exportPDF} title="Generar PDF formal" style={{ flex: 1 }}>
-              📄 PDF
+            <button className="ghost small" onClick={handleExportPdf} disabled={pdfStatus === "busy"} title="Descargar PDF" style={{ flex: 1 }}>
+              {pdfStatus === "busy" ? "Generando…" : pdfStatus === "done" ? "¡Listo! 💗" : "📄 PDF"}
             </button>
           </div>
 
