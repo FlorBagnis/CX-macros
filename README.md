@@ -126,6 +126,16 @@ Seguir creciendo en el mundo de la tecnología combinando mi experiencia en **Cu
 
 ---
 
+
+¿Te sirvió? Dejale una ⭐ al repo.
+
+---
+
+## 📄 Licencia
+
+Distribuido bajo licencia MIT. Ver el archivo `LICENSE`.
+
+
 ### 👩‍💻 Autora
 
 **Florencia Bagnis**
