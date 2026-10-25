@@ -142,7 +142,7 @@ Distribuido bajo licencia MIT. Ver el archivo `LICENSE`.
 
 * 💼 [LinkedIn](https://www.linkedin.com/in/florencia-bagnis)
 * 🐙 [GitHub](https://github.com/FlorBagnis)
-* 💻 [Portfolio](https://florbagnis.github.io/Portfolio-FlorBagnis/)
+* 💻 [Portfolio](https://florbagnis.github.io/)
 * 💌 [florenciasoledadbagnis@gmail.com](mailto:florenciasoledadbagnis@gmail.com)
 
 > 💗 Proyecto personal desarrollado con **React** y **Vite** para agilizar la atención al cliente y, a la vez, aprender haciendo. Parte de mi portfolio, en la intersección de **Frontend Development**, **Customer Experience** y **Operaciones**.
